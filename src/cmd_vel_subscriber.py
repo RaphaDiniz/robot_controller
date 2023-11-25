@@ -20,7 +20,7 @@ class RobotController:
     def scan_callback(self, scan_data):
         # Imprimir os valores das leituras do LIDAR
         # rospy.loginfo("Leituras do LIDAR: {}".format(scan_data.ranges))
-
+        print(scan_data.ranges)
         # Verificar se há obstáculo à frente e ajustar o movimento
         if min(scan_data.ranges[1:31]) < self.obstacle_distance:
             if not self.obstacle_detected:
