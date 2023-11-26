@@ -53,7 +53,7 @@ class RobotController:
 
 if __name__ == '__main__':
     rospy.init_node('robot_controller')
-    serial_port = '/dev/ttyUSB1'  # Substitua pela sua porta serial correta
+    serial_port = '/dev/ttyUSB0'  # Substitua pela sua porta serial correta
     controller = RobotController(serial_port)
     try:
         controller.control_loop()
