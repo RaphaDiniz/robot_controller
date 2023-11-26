@@ -25,6 +25,7 @@ class laserAvoid:
         self.Right_warning = 0
         self.Left_warning = 0
         self.front_warning = 0
+        self.before_command = ''
         self.sub_laser = rospy.Subscriber('/scan', LaserScan, self.registerScan)
         self.serial_port = serial.Serial(serial_port, 115200, timeout=1)
 
@@ -107,8 +108,12 @@ class laserAvoid:
     def send_serial_command(self, command):
         # Envia o comando para a porta serial
         try:
-            self.serial_port.write(command.encode())
-            rospy.loginfo("Comando enviado para a porta serial: {}".format(command))
+            if command != self.before_command:
+                self.before_command = command;
+                cammandEncode = command.encode('utf-8');
+                self.serial_port.write(cammandEncode)
+                print(cammandEncode)
+                rospy.loginfo("Comando enviado para a porta serial: {}".format(cammandEncode))
         except serial.SerialException as e:
             rospy.logerr("Erro ao escrever na porta serial: {}".format(e))
 
