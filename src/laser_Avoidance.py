@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# coding:utf-8
+# -*- coding: utf-8 -*-
 import numpy as np
 from common import *
 from time import sleep
@@ -57,9 +57,9 @@ class laserAvoid:
                 # 通过清除不需要的扇区的数据来保留有效的数据
                 if 10 < i < self.LaserAngle:
                     if ranges[i] < self.ResponseDist: self.Left_warning += 1
-                elif (350 - self.LaserAngle) < i < 350:
+                elif (270 - self.LaserAngle) < i < 270:
                     if ranges[i] < self.ResponseDist: self.Right_warning += 1
-                elif (350 <= i <= 360) or (0<= i <=10):
+                elif (270 <= i <= 280) or (0<= i <=10):
                     # print ("i: {},dist: {}", format(i, ranges[i]))
                     if ranges[i] < self.ResponseDist: self.front_warning += 1
         # print (self.Left_warning,self.front_warning,self.Right_warning)
@@ -101,7 +101,7 @@ class laserAvoid:
             elif self.front_warning < 10 and self.Left_warning <= 10 and self.Right_warning > 10:
                 self.send_serial_command(self.obstacle_command)
                 sleep(0.2)
-            elif self.front_warning <= 10 and self.Left_warning <= 10 and self.Right_warning <= 10:
+            elif self.front_warning <= 10 and (self.Left_warning <= 10 or self.Right_warning <= 10):
                 self.send_serial_command(self.default_command)
             self.r.sleep()
             # else : self.ros_ctrl.pub_vel.publish(Twist())
