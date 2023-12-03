@@ -19,8 +19,8 @@ class laserAvoid:
         self.linear = 0.3
         self.angular = 1
         self.ResponseDist = 0.55
-        self.twist_cmd.linear.x = NULL
-        self.twist_cmd.angular.z = NULL
+        self.twist_cmd.linear.x
+        self.twist_cmd.angular.z 
         self.LaserAngle = 30  # 10~180
         self.Moving = False
         self.switch = False
