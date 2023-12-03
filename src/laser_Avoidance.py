@@ -131,9 +131,9 @@ class laserAvoid:
                 # Lógica para controle remoto via teleop_twist_keyboard
                 self.teleop_callback(self.latest_twist_cmd)
                 self.twist_cmd.linear == NULL
-                twist_cmd.angular == NULL
+                self.twist_cmd.angular == NULL
                 self.autonomous_mode = True
-            if twist_cmd.linear != NULL or twist_cmd.angular != NULL:
+            if self.twist_cmd.linear != NULL or self.twist_cmd.angular != NULL:
                 self.autonomous_mode = False
 
             self.r.sleep()
