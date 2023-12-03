@@ -1,22 +1,9 @@
 <launch>
-    <!-- Launch file for running three ROS nodes -->
+  <!-- Declare the USB port parameter -->
+  <arg name="serial_port" default="/dev/ttyUSB1" />
 
-    <!-- Launch the first node: ros_imu_bno055 -->
-    <include file="$(find ros_imu_bno055)/launch/imu.launch">
-        <!-- Add any arguments specific to ros_imu_bno055 here -->
-    </include>
-
-    <!-- Launch the second node: transbot_nav -->
-    <include file="$(find transbot_nav)/launch/laser_map.launch">
-        <arg name="use_gui" value="false"/>
-        <arg name="open_rviz" value="true"/>
-        <arg name="robot_model" value="astra"/> <!-- Hardcoded robot_model parameter -->
-        <arg name="map_type" value="gmapping"/> <!-- Hardcoded map_type parameter -->
-    </include>
-
-
-    <!-- Launch the third node: robot_controller -->
-    <node name="robot_controller_node" pkg="robot_controller" type="laser_Avoidance.py" output="screen">
-        <!-- Add any arguments specific to robot_controller here -->
-    </node>
+  <!-- Run your Python script with the specified serial port parameter -->
+  <node name="robot_controller" pkg="robot_controller" type="laser_Avoidance.py" output="screen">
+    <param name="serial_port" value="$(arg serial_port)" />
+  </node>
 </launch>

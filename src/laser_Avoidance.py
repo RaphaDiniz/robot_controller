@@ -31,7 +31,8 @@ class laserAvoid:
         self.before_command = ''
         self.sub_laser = rospy.Subscriber('/scan', LaserScan, self.registerScan)
         self.sub_teleop = rospy.Subscriber('/cmd_vel', Twist, self.teleop_callback)
-        self.serial_port = serial.Serial(serial_port, 115200, timeout=1)
+        self.serial_port = rospy.get_param('~serial_port', '/dev/ttyUSB1')
+        self.serial_port = serial.Serial(self.serial_port, 115200, timeout=1)
 
     def cancel(self):
         self.sub_laser.unregister()
@@ -63,6 +64,7 @@ class laserAvoid:
             command = self.stop_command
 
         self.send_serial_command(command)
+        return command
 
     def registerScan(self, scan_data):
         if self.running == True: return
@@ -102,6 +104,8 @@ class laserAvoid:
                 if self.front_warning > 10 and self.Left_warning > 10 and self.Right_warning > 10:
                     self.send_serial_command(self.obstacle_all_command)
                     sleep(0.2)
+                    self.send_serial_command(self.obstacle_left_command)
+                    sleep(0.2)
                 elif self.front_warning > 10 and self.Left_warning <= 10 and self.Right_warning > 10:
                     self.send_serial_command(self.obstacle_left_command)
                     sleep(0.2)
@@ -126,11 +130,12 @@ class laserAvoid:
                 elif self.front_warning < 10 and self.Left_warning <= 10 and self.Right_warning > 10:
                     self.send_serial_command(self.obstacle_command)
                     sleep(0.2)
-                elif self.front_warning <= 10 and (self.Left_warning <= 10 or self.Right_warning <= 10):
+                elif self.front_warning <= 10 and (self.Left_warning <= 10 and self.Right_warning <= 10):
                     self.send_serial_command(self.default_command)
             else:
+
                 # Lógica para controle remoto via teleop_twist_keyboard
-                self.teleop_callback(self.twist_cmd)
+                self.default_command = self.teleop_callback(self.twist_cmd)
                 self.twist_cmd.linear = None
                 self.twist_cmd.angular = None
                 self.autonomous_mode = True
@@ -154,7 +159,6 @@ class laserAvoid:
 
 if __name__ == '__main__':
     rospy.init_node('robot_controller', anonymous=False)
-    serial_port = '/dev/ttyUSB1' 
     tracker = laserAvoid()
     tracker.robot_move()
     rospy.spin()
