@@ -130,7 +130,7 @@ class laserAvoid:
                     self.send_serial_command(self.default_command)
             else:
                 # Lógica para controle remoto via teleop_twist_keyboard
-                self.teleop_callback(self.latest_twist_cmd)
+                self.teleop_callback(self.twist_cmd)
                 self.twist_cmd.linear = None
                 self.twist_cmd.angular = None
                 self.autonomous_mode = True
