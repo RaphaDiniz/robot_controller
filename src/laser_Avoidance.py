@@ -15,18 +15,21 @@ class laserAvoid:
         self.obstacle_command = 'D'
         self.obstacle_all_command = 'W'
         self.obstacle_left_command = 'A'
+        self.stop_command = 'K'
         self.linear = 0.3
         self.angular = 1
         self.ResponseDist = 0.55
         self.LaserAngle = 30  # 10~180
         self.Moving = False
         self.switch = False
+        self.autonomous_mode = True
         self.running = False
         self.Right_warning = 0
         self.Left_warning = 0
         self.front_warning = 0
         self.before_command = ''
         self.sub_laser = rospy.Subscriber('/scan', LaserScan, self.registerScan)
+        self.sub_teleop = rospy.Subscriber('/cmd_vel', Twist, self.teleop_callback)
         self.serial_port = serial.Serial(serial_port, 115200, timeout=1)
 
     def cancel(self):
@@ -40,6 +43,25 @@ class laserAvoid:
         self.LaserAngle = config['LaserAngle']
         self.ResponseDist = config['ResponseDist']
         return config
+
+    def teleop_callback(self, twist_cmd):
+        # Função chamada quando um novo comando Twist é recebido do teclado
+        linear = twist_cmd.linear.x
+        angular = twist_cmd.angular.z
+
+        # Traduzindo comandos Twist para comandos específicos do robô
+        if linear > 0:
+            command = self.default_command
+        elif linear < 0:
+            command = self.obstacle_all_command
+        elif angular > 0:
+            command = self.obstacle_left_command
+        elif angular < 0:
+            command = self.obstacle_command
+        else:
+            command = self.stop_command
+
+        self.send_serial_command(command)
 
     def registerScan(self, scan_data):
         if self.running == True: return
@@ -66,14 +88,16 @@ class laserAvoid:
 
 
     def robot_move(self):
-        while not rospy.is_shutdown():
-            if self.switch == True:
-                if self.Moving == True:
-                    self.send_serial_command(self.default_command)
-                    self.Moving = not self.Moving
-                continue
-            self.Moving = True
-            # print("Left: " + str(self.Left_warning) + " Front: " + str(self.front_warning) + " Right: " + str(self.Right_warning))
+    while not rospy.is_shutdown():
+        if self.switch:
+            if self.Moving:
+                self.send_serial_command(self.default_command)
+                self.Moving = not self.Moving
+            continue
+        self.Moving = True
+
+        if self.autonomous_mode:
+            # Lógica para controle autônomo
             if self.front_warning > 10 and self.Left_warning > 10 and self.Right_warning > 10:
                 self.send_serial_command(self.obstacle_all_command)
                 sleep(0.2)
@@ -103,7 +127,16 @@ class laserAvoid:
                 sleep(0.2)
             elif self.front_warning <= 10 and (self.Left_warning <= 10 or self.Right_warning <= 10):
                 self.send_serial_command(self.default_command)
-            self.r.sleep()
+        else:
+            # Lógica para controle remoto via teleop_twist_keyboard
+            self.teleop_callback(self.latest_twist_cmd)
+            self.twist_cmd.linear == NULL
+            twist_cmd.angular == NULL
+            self.autonomous_mode = True
+        if twist_cmd.linear != NULL or twist_cmd.angular != NULL:
+            self.autonomous_mode = False
+
+        self.r.sleep()
             # else : self.ros_ctrl.pub_vel.publish(Twist())
     def send_serial_command(self, command):
         # Envia o comando para a porta serial
