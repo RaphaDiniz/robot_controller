@@ -154,7 +154,7 @@ class laserAvoid:
 
 if __name__ == '__main__':
     rospy.init_node('robot_controller', anonymous=False)
-    serial_port = '/dev/ttyUSB0' 
+    serial_port = '/dev/ttyUSB1' 
     tracker = laserAvoid()
     tracker.robot_move()
     rospy.spin()
