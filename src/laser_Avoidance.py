@@ -131,11 +131,11 @@ class laserAvoid:
             else:
                 # Lógica para controle remoto via teleop_twist_keyboard
                 self.teleop_callback(self.latest_twist_cmd)
-                self.twist_cmd.linear == NULL
-                self.twist_cmd.angular == NULL
+                self.twist_cmd.linear = None
+                self.twist_cmd.angular = None
                 self.autonomous_mode = True
-            if self.twist_cmd.linear != NULL or self.twist_cmd.angular != NULL:
-                self.autonomous_mode = False
+            if self.twist_cmd.linear is not None or self.twist_cmd.angular is not None:
+                self.autonomous_mode = None 
 
             self.r.sleep()
             # else : self.ros_ctrl.pub_vel.publish(Twist())
