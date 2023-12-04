@@ -14,9 +14,9 @@ class laserAvoid:
         rospy.on_shutdown(self.cancel)
         self.r = rospy.Rate(20)
         self.default_command = 'W'
-        self.obstacle_command = 'A'
+        self.obstacle_command = 'D'
         self.obstacle_all_command = 'S'
-        self.obstacle_left_command = 'D'
+        self.obstacle_left_command = 'A'
         self.stop_command = 'K'
         self.linear = 0.3
         self.angular = 1
