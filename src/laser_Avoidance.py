@@ -30,7 +30,6 @@ class laserAvoid:
         self.front_warning = 0
         self.before_command = ''
         self.sub_laser = rospy.Subscriber('/scan', LaserScan, self.registerScan)
-        self.sub_teleop = rospy.Subscriber('/cmd_vel', Twist, self.teleop_callback)
         self.serial_port = rospy.get_param('~serial_port', '/dev/ttyUSB1')
         self.serial_port = serial.Serial(self.serial_port, 115200, timeout=1)
 
@@ -46,25 +45,6 @@ class laserAvoid:
         self.ResponseDist = config['ResponseDist']
         return config
 
-    def teleop_callback(self, twist_cmd):
-        # Função chamada quando um novo comando Twist é recebido do teclado
-        linear = twist_cmd.linear.x
-        angular = twist_cmd.angular.z
-
-        # Traduzindo comandos Twist para comandos específicos do robô
-        if linear > 0:
-            command = self.default_command
-        elif linear < 0:
-            command = self.obstacle_all_command
-        elif angular > 0:
-            command = self.obstacle_left_command
-        elif angular < 0:
-            command = self.obstacle_command
-        else:
-            command = self.stop_command
-
-        self.send_serial_command(command)
-        return command
 
     def registerScan(self, scan_data):
         if self.running == True: return
@@ -98,52 +78,40 @@ class laserAvoid:
                     self.Moving = not self.Moving
                 continue
             self.Moving = True
-
-            if self.autonomous_mode:
-                # Lógica para controle autônomo
-                if self.front_warning > 10 and self.Left_warning > 10 and self.Right_warning > 10:
-                    self.send_serial_command(self.obstacle_all_command)
-                    sleep(0.2)
-                    self.send_serial_command(self.obstacle_left_command)
-                    sleep(0.2)
-                elif self.front_warning > 10 and self.Left_warning <= 10 and self.Right_warning > 10:
-                    self.send_serial_command(self.obstacle_left_command)
-                    sleep(0.2)
-                    if self.Left_warning > 10 and self.Right_warning <= 10:
-                        self.send_serial_command(self.obstacle_command)
-                        sleep(0.4)
-                elif self.front_warning > 10 and self.Left_warning > 10 and self.Right_warning <= 10:
-                    self.send_serial_command(self.obstacle_command)
-                    sleep(0.2)
-                    if self.Left_warning <= 10 and self.Right_warning > 10:
-                        self.send_serial_command(self.obstacle_left_command)
-                        sleep(0.4)
-                elif self.front_warning > 10 and self.Left_warning < 10 and self.Right_warning < 10:
-                    self.send_serial_command(self.obstacle_left_command)
-                    sleep(0.2)
-                elif self.front_warning < 10 and self.Left_warning > 10 and self.Right_warning > 10:
+            # Lógica para controle autônomo
+            if self.front_warning > 10 and self.Left_warning > 10 and self.Right_warning > 10:
+                self.send_serial_command(self.obstacle_all_command)
+                sleep(0.2)
+                self.send_serial_command(self.obstacle_left_command)
+                sleep(0.2)
+            elif self.front_warning > 10 and self.Left_warning <= 10 and self.Right_warning > 10:
+                self.send_serial_command(self.obstacle_left_command)
+                sleep(0.2)
+                if self.Left_warning > 10 and self.Right_warning <= 10:
                     self.send_serial_command(self.obstacle_command)
                     sleep(0.4)
-                elif self.front_warning < 10 and self.Left_warning > 10 and self.Right_warning <= 10:
+            elif self.front_warning > 10 and self.Left_warning > 10 and self.Right_warning <= 10:
+                self.send_serial_command(self.obstacle_command)
+                sleep(0.2)
+                if self.Left_warning <= 10 and self.Right_warning > 10:
                     self.send_serial_command(self.obstacle_left_command)
-                    sleep(0.2)
-                elif self.front_warning < 10 and self.Left_warning <= 10 and self.Right_warning > 10:
-                    self.send_serial_command(self.obstacle_command)
-                    sleep(0.2)
-                elif self.front_warning <= 10 and (self.Left_warning <= 10 and self.Right_warning <= 10):
-                    self.send_serial_command(self.default_command)
-            else:
-
-                # Lógica para controle remoto via teleop_twist_keyboard
-                self.default_command = self.teleop_callback(self.twist_cmd)
-                self.twist_cmd.linear = None
-                self.twist_cmd.angular = None
-                self.autonomous_mode = True
-            if self.twist_cmd.linear is not None or self.twist_cmd.angular is not None:
-                self.autonomous_mode = None 
-
-            self.r.sleep()
-            # else : self.ros_ctrl.pub_vel.publish(Twist())
+                    sleep(0.4)
+            elif self.front_warning > 10 and self.Left_warning < 10 and self.Right_warning < 10:
+                self.send_serial_command(self.obstacle_left_command)
+                sleep(0.2)
+            elif self.front_warning < 10 and self.Left_warning > 10 and self.Right_warning > 10:
+                self.send_serial_command(self.obstacle_command)
+                sleep(0.4)
+            elif self.front_warning < 10 and self.Left_warning > 10 and self.Right_warning <= 10:
+                self.send_serial_command(self.obstacle_left_command)
+                sleep(0.2)
+            elif self.front_warning < 10 and self.Left_warning <= 10 and self.Right_warning > 10:
+                self.send_serial_command(self.obstacle_command)
+                sleep(0.2)
+            elif self.front_warning <= 10 and (self.Left_warning <= 10 and self.Right_warning <= 10):
+                self.send_serial_command(self.default_command)
+        self.r.sleep()
+        # else : self.ros_ctrl.pub_vel.publish(Twist())
     def send_serial_command(self, command):
         # Envia o comando para a porta serial
         try:
