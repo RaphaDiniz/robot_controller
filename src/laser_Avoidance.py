@@ -93,8 +93,8 @@ class laserAvoid:
 
     def robot_move(self):
         while not rospy.is_shutdown():
-            linear = twist_msg.linear.x
-            angular = twist_msg.angular.z
+            linear = self.twist_msg.linear.x
+            angular = self.twist_msg.angular.z
             if not (angular or linear):
                 self.autonomous_mode = True 
                 if self.switch:
