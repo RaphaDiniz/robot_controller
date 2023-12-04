@@ -131,8 +131,6 @@ class laserAvoid:
                 self.send_serial_command(self.obstacle_command)
             elif self.front_warning <= 10 and (self.Left_warning <= 10 and self.Right_warning <= 10):
                 self.send_serial_command(self.default_command)
-        else:
-            continue
 
         self.r.sleep()
 
