@@ -119,7 +119,7 @@ class laserAvoid:
                 self.serial_port.write(cammandEncode)
                 print(cammandEncode)
                 rospy.loginfo("Comando enviado para a porta serial: {}".format(cammandEncode))
-                sleep(0.5)
+                sleep(0.9)
         except serial.SerialException as e:
             rospy.logerr("Erro ao escrever na porta serial: {}".format(e))
 
