@@ -138,17 +138,19 @@ class laserAvoid:
     def switch_control(self, twist_cmd):
         linear = twist_cmd.linear.x
         angular = twist_cmd.angular.z
-        #LETRA"U" = twist_cmd.linear.Y
 
-        if(linear > 0 and angular < 0): #esse é a letra  "U"
+        # Inicializa a variável auxiliar
+        auxiliar = False
+
+        if linear > 0 and angular < 0:
             auxiliar = True
-        if(linear > 0 and angular < 0):
+        if linear > 0 and angular > 0:
             auxiliar = False
 
         if auxiliar:
-            cmd_vel_callback()
+            self.robot_move()
         if not auxiliar:
-            robot_move()
+            self.cmd_vel_callback(twist_cmd)
 
 
 
