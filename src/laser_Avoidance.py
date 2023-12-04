@@ -23,13 +23,14 @@ class laserAvoid:
         self.LaserAngle = 30  # 10~180
         self.Moving = False
         self.switch = False
-        self.autonomous_mode = True
+        self.autonomous_mode = False
         self.running = False
         self.Right_warning = 0
         self.Left_warning = 0
         self.front_warning = 0
         self.before_command = ''
         self.sub_laser = rospy.Subscriber('/scan', LaserScan, self.registerScan)
+        self.sub_cmd_vel = rospy.Subscriber('/cmd_vel', Twist, self.cmd_vel_callback)
         self.serial_port = rospy.get_param('~serial_port', '/dev/ttyUSB1')
         self.serial_port = serial.Serial(self.serial_port, 115200, timeout=1)
 
@@ -69,45 +70,70 @@ class laserAvoid:
                     if ranges[i] < self.ResponseDist: self.front_warning += 1
         # print (self.Left_warning,self.front_warning,self.Right_warning)
 
+    def cmd_vel_callback(self, twist_msg):
+        # Callback para receber comandos do tópico cmd_vel
+        if not self.autonomous_mode:
+            # Se estiver no modo manual, use os comandos recebidos
+            linear = twist_msg.linear.x
+            angular = twist_msg.angular.z
+
+            # Lógica para converter os comandos Twist em comandos específicos do seu robô
+            if linear > 0:
+                command = 'S' 
+            elif linear < 0 
+                command = 'W'
+            elif angular > 0:
+                command = 'A' 
+            elif angular < 0 
+                command = 'D'
+            else:
+                command = 'K'  # Parar o robô
+
+            self.send_serial_command(command)
 
     def robot_move(self):
         while not rospy.is_shutdown():
-            if self.switch:
-                if self.Moving:
-                    self.send_serial_command(self.default_command)
-                    self.Moving = not self.Moving
-                continue
-            self.Moving = True
-            # Lógica para controle autônomo
-            if self.front_warning > 10 and self.Left_warning > 10 and self.Right_warning > 10:
-                self.send_serial_command(self.obstacle_all_command)
-                sleep(0.2)
-            elif self.front_warning > 10 and self.Left_warning <= 10 and self.Right_warning > 10:
-                self.send_serial_command(self.obstacle_left_command)
-                sleep(0.2)
-                if self.Left_warning > 10 and self.Right_warning <= 10:
+            if not (angular or linear):
+                self.autonomous_mode = True 
+                if self.switch:
+                    if self.Moving:
+                        self.send_serial_command(self.default_command)
+                        self.Moving = not self.Moving
+                    continue
+                self.Moving = True
+                # Lógica para controle autônomo
+                if self.front_warning > 10 and self.Left_warning > 10 and self.Right_warning > 10:
+                    self.send_serial_command(self.obstacle_all_command)
+                    sleep(0.2)
+                elif self.front_warning > 10 and self.Left_warning <= 10 and self.Right_warning > 10:
+                    self.send_serial_command(self.obstacle_left_command)
+                    sleep(0.2)
+                    if self.Left_warning > 10 and self.Right_warning <= 10:
+                        self.send_serial_command(self.obstacle_command)
+                        sleep(0.4)
+                elif self.front_warning > 10 and self.Left_warning > 10 and self.Right_warning <= 10:
+                    self.send_serial_command(self.obstacle_command)
+                    sleep(0.2)
+                    if self.Left_warning <= 10 and self.Right_warning > 10:
+                        self.send_serial_command(self.obstacle_left_command)
+                        sleep(0.4)
+                elif self.front_warning > 10 and self.Left_warning < 10 and self.Right_warning < 10:
+                    self.send_serial_command(self.obstacle_left_command)
+                    sleep(0.2)
+                elif self.front_warning < 10 and self.Left_warning > 10 and self.Right_warning > 10:
                     self.send_serial_command(self.obstacle_command)
                     sleep(0.4)
-            elif self.front_warning > 10 and self.Left_warning > 10 and self.Right_warning <= 10:
-                self.send_serial_command(self.obstacle_command)
-                sleep(0.2)
-                if self.Left_warning <= 10 and self.Right_warning > 10:
+                elif self.front_warning < 10 and self.Left_warning > 10 and self.Right_warning <= 10:
                     self.send_serial_command(self.obstacle_left_command)
-                    sleep(0.4)
-            elif self.front_warning > 10 and self.Left_warning < 10 and self.Right_warning < 10:
-                self.send_serial_command(self.obstacle_left_command)
-                sleep(0.2)
-            elif self.front_warning < 10 and self.Left_warning > 10 and self.Right_warning > 10:
-                self.send_serial_command(self.obstacle_command)
-                sleep(0.4)
-            elif self.front_warning < 10 and self.Left_warning > 10 and self.Right_warning <= 10:
-                self.send_serial_command(self.obstacle_left_command)
-                sleep(0.2)
-            elif self.front_warning < 10 and self.Left_warning <= 10 and self.Right_warning > 10:
-                self.send_serial_command(self.obstacle_command)
-                sleep(0.2)
-            elif self.front_warning <= 10 and (self.Left_warning <= 10 and self.Right_warning <= 10):
-                self.send_serial_command(self.default_command)
+                    sleep(0.2)
+                elif self.front_warning < 10 and self.Left_warning <= 10 and self.Right_warning > 10:
+                    self.send_serial_command(self.obstacle_command)
+                    sleep(0.2)
+                elif self.front_warning <= 10 and (self.Left_warning <= 10 and self.Right_warning <= 10):
+                    self.send_serial_command(self.default_command)
+            else:
+                self.autonomous_mode = False
+
         self.r.sleep()
         # else : self.ros_ctrl.pub_vel.publish(Twist())
     def send_serial_command(self, command):
