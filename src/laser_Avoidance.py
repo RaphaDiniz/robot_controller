@@ -93,6 +93,8 @@ class laserAvoid:
 
     def robot_move(self):
         while not rospy.is_shutdown():
+            linear = twist_msg.linear.x
+            angular = twist_msg.angular.z
             if not (angular or linear):
                 self.autonomous_mode = True 
                 if self.switch:
@@ -104,31 +106,22 @@ class laserAvoid:
                 # Lógica para controle autônomo
                 if self.front_warning > 10 and self.Left_warning > 10 and self.Right_warning > 10:
                     self.send_serial_command(self.obstacle_all_command)
-                    sleep(0.2)
                 elif self.front_warning > 10 and self.Left_warning <= 10 and self.Right_warning > 10:
                     self.send_serial_command(self.obstacle_left_command)
-                    sleep(0.2)
                     if self.Left_warning > 10 and self.Right_warning <= 10:
                         self.send_serial_command(self.obstacle_command)
-                        sleep(0.4)
                 elif self.front_warning > 10 and self.Left_warning > 10 and self.Right_warning <= 10:
                     self.send_serial_command(self.obstacle_command)
-                    sleep(0.2)
                     if self.Left_warning <= 10 and self.Right_warning > 10:
                         self.send_serial_command(self.obstacle_left_command)
-                        sleep(0.4)
                 elif self.front_warning > 10 and self.Left_warning < 10 and self.Right_warning < 10:
                     self.send_serial_command(self.obstacle_left_command)
-                    sleep(0.2)
                 elif self.front_warning < 10 and self.Left_warning > 10 and self.Right_warning > 10:
                     self.send_serial_command(self.obstacle_command)
-                    sleep(0.4)
                 elif self.front_warning < 10 and self.Left_warning > 10 and self.Right_warning <= 10:
                     self.send_serial_command(self.obstacle_left_command)
-                    sleep(0.2)
                 elif self.front_warning < 10 and self.Left_warning <= 10 and self.Right_warning > 10:
                     self.send_serial_command(self.obstacle_command)
-                    sleep(0.2)
                 elif self.front_warning <= 10 and (self.Left_warning <= 10 and self.Right_warning <= 10):
                     self.send_serial_command(self.default_command)
             else:
