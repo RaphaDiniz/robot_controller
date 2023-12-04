@@ -76,7 +76,7 @@ class laserAvoid:
             # Se estiver no modo manual, use os comandos recebidos
             linear = twist_cmd.linear.x
             angular = twist_cmd.angular.z
-            print(linear)
+            rospy.logerr(linear)
 
             # Lógica para converter os comandos Twist em comandos específicos do seu robô
             if linear > 0:
