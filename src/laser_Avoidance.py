@@ -76,7 +76,7 @@ class laserAvoid:
         linear = twist_cmd.linear.x
         angular = twist_cmd.angular.z
 
-        if linear > 0 and angular < 0:
+        if (linear > 0 and angular < 0): #LETRA U
             self.autonomous_mode = True
 
         # Lógica para converter os comandos Twist em comandos específicos do seu robô
@@ -94,12 +94,12 @@ class laserAvoid:
         self.send_serial_command(command)
 
     def robot_move(self):
+        linear = self.twist_cmd.linear.x
+        angular = self.twist_cmd.angular.z
 
         if self.autonomous_mode:
-            linear = self.twist_cmd.linear.x
-            angular = self.twist_cmd.angular.z
 
-            if linear > 0 and angular < 0:
+            if (linear > 0 and angular < 0): #LETRA U
                 self.autonomous_mode = False
 
             if self.switch:
@@ -132,7 +132,7 @@ class laserAvoid:
             elif self.front_warning <= 10 and (self.Left_warning <= 10 and self.Right_warning <= 10):
                 self.send_serial_command(self.default_command)
         else:
-            self.autonomous_mode = False
+            continue
 
         self.r.sleep()
 
@@ -152,10 +152,7 @@ class laserAvoid:
     def switch_control(self, twist_cmd):
         linear = twist_cmd.linear.x
         angular = twist_cmd.angular.z
-
-        if linear > 0 and angular > 0:
-            self.autonomous_mode = False
-
+        
         if self.autonomous_mode:
             self.robot_move()
         if not self.autonomous_mode:
