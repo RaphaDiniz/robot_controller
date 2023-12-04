@@ -76,6 +76,11 @@ class laserAvoid:
         linear = twist_cmd.linear.x
         angular = twist_cmd.angular.z
 
+        if linear > 0 and angular < 0:
+            self.autonomous_mode = True
+        if linear > 0 and angular > 0:
+            self.autonomous_mode = False
+
         # Lógica para converter os comandos Twist em comandos específicos do seu robô
         if linear > 0:
             command = 'S' 
