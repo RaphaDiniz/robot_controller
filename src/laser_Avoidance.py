@@ -8,6 +8,7 @@ from sensor_msgs.msg import LaserScan
 import serial
 
 
+
 class laserAvoid:
     def __init__(self):
         rospy.on_shutdown(self.cancel)
@@ -90,14 +91,23 @@ class laserAvoid:
         self.send_serial_command(command)
 
     def robot_move(self):
-        while not rospy.is_shutdown():
-            self.autonomous_mode = True 
+        linear = self.twist_cmd.linear.x
+        angular = self.twist_cmd.angular.z
+
+        if linear > 0 and angular < 0:
+            self.autonomous_mode = True
+        if linear > 0 and angular > 0:
+            self.autonomous_mode = False
+
+        if self.autonomous_mode:
             if self.switch:
                 if self.Moving:
                     self.send_serial_command(self.default_command)
                     self.Moving = not self.Moving
-                continue
+                return
+
             self.Moving = True
+
             # Lógica para controle autônomo
             if self.front_warning > 10 and self.Left_warning > 10 and self.Right_warning > 10:
                 self.send_serial_command(self.obstacle_all_command)
@@ -119,9 +129,11 @@ class laserAvoid:
                 self.send_serial_command(self.obstacle_command)
             elif self.front_warning <= 10 and (self.Left_warning <= 10 and self.Right_warning <= 10):
                 self.send_serial_command(self.default_command)
+        else:
+            self.autonomous_mode = False
 
-            self.r.sleep()
-        # else : self.ros_ctrl.pub_vel.publish(Twist())
+        self.r.sleep()
+
     
     def send_serial_command(self, command):
         # Envia o comando para a porta serial
@@ -139,17 +151,14 @@ class laserAvoid:
         linear = twist_cmd.linear.x
         angular = twist_cmd.angular.z
 
-        # Inicializa a variável auxiliar
-        auxiliar = False
-
         if linear > 0 and angular < 0:
-            auxiliar = True
+            self.autonomous_mode = True
         if linear > 0 and angular > 0:
-            auxiliar = False
+            self.autonomous_mode = False
 
-        if auxiliar:
+        if self.autonomous_mode:
             self.robot_move()
-        if not auxiliar:
+        if not self.autonomous_mode:
             self.cmd_vel_callback(twist_cmd)
 
 
