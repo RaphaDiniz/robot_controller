@@ -70,12 +70,12 @@ class laserAvoid:
                     if ranges[i] < self.ResponseDist: self.front_warning += 1
         # print (self.Left_warning,self.front_warning,self.Right_warning)
 
-    def cmd_vel_callback(self, twist_msg):
+    def cmd_vel_callback(self, twist_cmd):
         # Callback para receber comandos do tópico cmd_vel
         if not self.autonomous_mode:
             # Se estiver no modo manual, use os comandos recebidos
-            linear = twist_msg.linear.x
-            angular = twist_msg.angular.z
+            linear = twist_cmd.linear.x
+            angular = twist_cmd.angular.z
 
             # Lógica para converter os comandos Twist em comandos específicos do seu robô
             if linear > 0:
@@ -93,8 +93,8 @@ class laserAvoid:
 
     def robot_move(self):
         while not rospy.is_shutdown():
-            linear = self.twist_msg.linear.x
-            angular = self.twist_msg.angular.z
+            linear = self.twist_cmd.linear.x
+            angular = self.twist_cmd.angular.z
             if not (angular or linear):
                 self.autonomous_mode = True 
                 if self.switch:
