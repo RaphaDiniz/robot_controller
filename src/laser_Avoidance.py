@@ -80,11 +80,11 @@ class laserAvoid:
             # Lógica para converter os comandos Twist em comandos específicos do seu robô
             if linear > 0:
                 command = 'S' 
-            elif linear < 0 
+            elif linear < 0: 
                 command = 'W'
             elif angular > 0:
                 command = 'A' 
-            elif angular < 0 
+            elif angular < 0: 
                 command = 'D'
             else:
                 command = 'K'  # Parar o robô
