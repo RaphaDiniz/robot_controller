@@ -7,6 +7,7 @@ from geometry_msgs.msg import Twist
 from sensor_msgs.msg import LaserScan
 import serial
 
+
 class laserAvoid:
     def __init__(self):
         rospy.on_shutdown(self.cancel)
@@ -46,7 +47,6 @@ class laserAvoid:
         self.ResponseDist = config['ResponseDist']
         return config
 
-
     def registerScan(self, scan_data):
         if self.running == True: return
         # 记录激光扫描并发布最近物体的位置（或指向某点）
@@ -72,64 +72,57 @@ class laserAvoid:
 
     def cmd_vel_callback(self, twist_cmd):
         # Callback para receber comandos do tópico cmd_vel
-        if not self.autonomous_mode:
-            # Se estiver no modo manual, use os comandos recebidos
-            linear = twist_cmd.linear.x
-            angular = twist_cmd.angular.z
-            rospy.logerr(linear)
+        linear = twist_cmd.linear.x
+        angular = twist_cmd.angular.z
 
-            # Lógica para converter os comandos Twist em comandos específicos do seu robô
-            if linear > 0:
-                command = 'S' 
-            elif linear < 0: 
-                command = 'W'
-            elif angular > 0:
-                command = 'A' 
-            elif angular < 0: 
-                command = 'D'
-            else:
-                command = 'K'  # Parar o robô
+        # Lógica para converter os comandos Twist em comandos específicos do seu robô
+        if linear > 0:
+            command = 'S' 
+        elif linear < 0:
+            command = 'W'
+        elif angular > 0:
+            command = 'A' 
+        elif angular < 0: 
+            command = 'D'
+        else:
+            command = 'K'  # Parar o robô
 
-            self.send_serial_command(command)
+        self.send_serial_command(command)
 
     def robot_move(self):
         while not rospy.is_shutdown():
-            linear = self.twist_cmd.linear.x
-            angular = self.twist_cmd.angular.z
-            if not (angular or linear):
-                self.autonomous_mode = True 
-                if self.switch:
-                    if self.Moving:
-                        self.send_serial_command(self.default_command)
-                        self.Moving = not self.Moving
-                    continue
-                self.Moving = True
-                # Lógica para controle autônomo
-                if self.front_warning > 10 and self.Left_warning > 10 and self.Right_warning > 10:
-                    self.send_serial_command(self.obstacle_all_command)
-                elif self.front_warning > 10 and self.Left_warning <= 10 and self.Right_warning > 10:
-                    self.send_serial_command(self.obstacle_left_command)
-                    if self.Left_warning > 10 and self.Right_warning <= 10:
-                        self.send_serial_command(self.obstacle_command)
-                elif self.front_warning > 10 and self.Left_warning > 10 and self.Right_warning <= 10:
-                    self.send_serial_command(self.obstacle_command)
-                    if self.Left_warning <= 10 and self.Right_warning > 10:
-                        self.send_serial_command(self.obstacle_left_command)
-                elif self.front_warning > 10 and self.Left_warning < 10 and self.Right_warning < 10:
-                    self.send_serial_command(self.obstacle_left_command)
-                elif self.front_warning < 10 and self.Left_warning > 10 and self.Right_warning > 10:
-                    self.send_serial_command(self.obstacle_command)
-                elif self.front_warning < 10 and self.Left_warning > 10 and self.Right_warning <= 10:
-                    self.send_serial_command(self.obstacle_left_command)
-                elif self.front_warning < 10 and self.Left_warning <= 10 and self.Right_warning > 10:
-                    self.send_serial_command(self.obstacle_command)
-                elif self.front_warning <= 10 and (self.Left_warning <= 10 and self.Right_warning <= 10):
+            self.autonomous_mode = True 
+            if self.switch:
+                if self.Moving:
                     self.send_serial_command(self.default_command)
-            else:
-                self.autonomous_mode = False
+                    self.Moving = not self.Moving
+                continue
+            self.Moving = True
+            # Lógica para controle autônomo
+            if self.front_warning > 10 and self.Left_warning > 10 and self.Right_warning > 10:
+                self.send_serial_command(self.obstacle_all_command)
+            elif self.front_warning > 10 and self.Left_warning <= 10 and self.Right_warning > 10:
+                self.send_serial_command(self.obstacle_left_command)
+                if self.Left_warning > 10 and self.Right_warning <= 10:
+                    self.send_serial_command(self.obstacle_command)
+            elif self.front_warning > 10 and self.Left_warning > 10 and self.Right_warning <= 10:
+                self.send_serial_command(self.obstacle_command)
+                if self.Left_warning <= 10 and self.Right_warning > 10:
+                    self.send_serial_command(self.obstacle_left_command)
+            elif self.front_warning > 10 and self.Left_warning < 10 and self.Right_warning < 10:
+                self.send_serial_command(self.obstacle_left_command)
+            elif self.front_warning < 10 and self.Left_warning > 10 and self.Right_warning > 10:
+                self.send_serial_command(self.obstacle_command)
+            elif self.front_warning < 10 and self.Left_warning > 10 and self.Right_warning <= 10:
+                self.send_serial_command(self.obstacle_left_command)
+            elif self.front_warning < 10 and self.Left_warning <= 10 and self.Right_warning > 10:
+                self.send_serial_command(self.obstacle_command)
+            elif self.front_warning <= 10 and (self.Left_warning <= 10 and self.Right_warning <= 10):
+                self.send_serial_command(self.default_command)
 
-        self.r.sleep()
+            self.r.sleep()
         # else : self.ros_ctrl.pub_vel.publish(Twist())
+    
     def send_serial_command(self, command):
         # Envia o comando para a porta serial
         try:
@@ -142,10 +135,29 @@ class laserAvoid:
         except serial.SerialException as e:
             rospy.logerr("Erro ao escrever na porta serial: {}".format(e))
 
+    def switch_control(self, twist_cmd):
+        linear = twist_cmd.linear.x
+        angular = twist_cmd.angular.z
+        #LETRA"U" = twist_cmd.linear.Y
+
+            if(linear > 0 and angular < 0): #esse é a letra  "U"
+                auxiliar = True
+            if(linear > 0 and angular < 0):
+                auxiliar = False
+
+            if auxiliar:
+                cmd_vel_callback()
+            if not auxiliar:
+                robot_move()
+ 
+
 
 if __name__ == '__main__':
     rospy.init_node('robot_controller', anonymous=False)
     tracker = laserAvoid()
-    tracker.robot_move()
+
+    # Subscreva o tópico cmd_vel com a função switch_control
+    rospy.Subscriber('/cmd_vel', Twist, tracker.switch_control)
+
     rospy.spin()
     tracker.cancel()
