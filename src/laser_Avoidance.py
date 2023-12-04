@@ -140,16 +140,16 @@ class laserAvoid:
         angular = twist_cmd.angular.z
         #LETRA"U" = twist_cmd.linear.Y
 
-            if(linear > 0 and angular < 0): #esse é a letra  "U"
-                auxiliar = True
-            if(linear > 0 and angular < 0):
-                auxiliar = False
+        if(linear > 0 and angular < 0): #esse é a letra  "U"
+            auxiliar = True
+        if(linear > 0 and angular < 0):
+            auxiliar = False
 
-            if auxiliar:
-                cmd_vel_callback()
-            if not auxiliar:
-                robot_move()
- 
+        if auxiliar:
+            cmd_vel_callback()
+        if not auxiliar:
+            robot_move()
+
 
 
 if __name__ == '__main__':
