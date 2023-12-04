@@ -18,7 +18,7 @@ class laserAvoid:
         self.stop_command = 'K'
         self.linear = 0.3
         self.angular = 1
-        self.ResponseDist = 0.15
+        self.ResponseDist = 0.25
         self.twist_cmd = Twist() 
         self.LaserAngle = 30  # 10~180
         self.Moving = False
@@ -119,7 +119,6 @@ class laserAvoid:
                 self.serial_port.write(cammandEncode)
                 print(cammandEncode)
                 rospy.loginfo("Comando enviado para a porta serial: {}".format(cammandEncode))
-                sleep(0.9)
         except serial.SerialException as e:
             rospy.logerr("Erro ao escrever na porta serial: {}".format(e))
 
