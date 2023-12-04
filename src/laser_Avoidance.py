@@ -18,7 +18,7 @@ class laserAvoid:
         self.stop_command = 'K'
         self.linear = 0.3
         self.angular = 1
-        self.ResponseDist = 0.55
+        self.ResponseDist = 0.15
         self.twist_cmd = Twist() 
         self.LaserAngle = 30  # 10~180
         self.Moving = False
