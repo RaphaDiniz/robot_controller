@@ -21,10 +21,8 @@ class RobotController:
     def cmd_vel_callback(self, twist_cmd):
         # Callback para receber comandos do tópico cmd_vel
         linear = twist_cmd.linear.x
-        rospy.logerr(twist_cmd.linear)
         angular = twist_cmd.angular.z
 
-        # Lógica para converter os comandos Twist em comandos específicos do seu robô
         if linear > 0:
             command = 'S' 
 
