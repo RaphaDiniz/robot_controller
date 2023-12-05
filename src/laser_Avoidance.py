@@ -81,10 +81,7 @@ class laserAvoid:
             # FRENTE 10
             if self.front_warning > 10 and self.Left_warning > 10 and self.Right_warning > 10:
                 self.send_serial_command(self.obstacle_all_command)
-                if self.Left_warning < self.Right_warning:
-                    self.send_serial_command(self.obstacle_left_command)
-                else:
-                    self.send_serial_command(self.obstacle_command)    
+                sleep(0.3)
                 
             elif self.front_warning > 10 and self.Left_warning <= 10 and self.Right_warning > 10:
                 self.send_serial_command(self.obstacle_left_command)
